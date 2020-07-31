@@ -106,59 +106,60 @@ public class ChooseAreaFragment extends Fragment {
         provinceList = DataSupport.findAll(Province.class);
         if (provinceList.size() > 0) {
             dataList.clear();
-            for(Province province:provinceList){
+            for (Province province : provinceList) {
                 dataList.add(province.getProvinceName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
             currentLevel = LEVEL_PROVINCE;
-        }else{
+        } else {
             String address = "http://guolin.tech/api/china";
-            queryFormSever(address,"province");
+            queryFormSever(address, "province");
         }
     }
 
     //查询选中省内所有的市，优先从数据库查询，如果没有查询到再去服务器上查询
-    private void queryCities(){
+    private void queryCities() {
         title_Text.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
-        cityList = DataSupport.where("provinceid = ?",String.valueOf(selectedProvince.getId())).find(City.class);
-        if(cityList.size()>0){
+        cityList = DataSupport.where("provinceid	=	?", String.valueOf(selectedProvince.getId())).find(City.class);
+        if (cityList.size() > 0) {
             dataList.clear();
-            for(City city:cityList){
+            for (City city : cityList) {
                 dataList.add(city.getCityName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
             currentLevel = LEVEL_CITY;
-        }else{
+        } else {
             int provinceCode = selectedProvince.getProvineceCode();
             String address = "http://guolin.tech/api/china/" + provinceCode;
-            queryFormSever(address,"city");
+            queryFormSever(address, "city");
         }
     }
 
     //查询选中市内所有的县，优先从数据库查询，如果没有查询到再去服务器上查询
-    private void queryCounties(){
+    private void queryCounties() {
         title_Text.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
-        countyList = DataSupport.where("cityid = ?",String.valueOf(selectedCity.getId())).find(County.class);
-        if(countyList.size() > 0){
+        countyList = DataSupport.where("cityid = ?", String.valueOf(selectedCity.getId())).find(County.class);
+        if (countyList.size() > 0) {
             dataList.clear();
-            for(County county:countyList){
+            for (County county : countyList) {
                 dataList.add(county.getCountyName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
             currentLevel = LEVEL_COUNTY;
-        }else{
+        } else {
             int provinceCode = selectedProvince.getProvineceCode();
             int cityCode = selectedCity.getCityCode();
             String address = "http://guolin.tech/api/china/" + provinceCode + "/" + cityCode;
-            queryFormSever(address,"county");
+            queryFormSever(address, "county");
         }
     }
-    private void queryFormSever(String address,final String type){
+
+    private void queryFormSever(String address, final String type) {
         showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
@@ -168,7 +169,7 @@ public class ChooseAreaFragment extends Fragment {
                     @Override
                     public void run() {
                         closeProgressDialog();
-                        Toast.makeText(getContext(),"加载失败",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -177,23 +178,23 @@ public class ChooseAreaFragment extends Fragment {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String responseText = response.body().string();
                 boolean result = false;
-                if("province".equals(type)){
+                if ("province".equals(type)) {
                     result = Utility.handleProvinceResponse(responseText);
-                }else if("city".equals(type)){
-                    result = Utility.handleCityResponse(responseText,selectedProvince.getId());
-                }else if("county".equals(type)){
-                    result = Utility.handleCountyResponse(responseText,selectedCity.getId());
+                } else if ("city".equals(type)) {
+                    result = Utility.handleCityResponse(responseText, selectedProvince.getId());
+                } else if ("county".equals(type)) {
+                    result = Utility.handleCountyResponse(responseText, selectedCity.getId());
                 }
-                if(result){
+                if (result) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             closeProgressDialog();
-                            if("province".equals(type)) {
+                            if ("province".equals(type)) {
                                 queryProvinces();
-                            }else if("city".equals(type)){
+                            } else if ("city".equals(type)) {
                                 queryCities();
-                            }else if("county".equals(type)){
+                            } else if ("county".equals(type)) {
                                 queryCounties();
                             }
                         }
@@ -204,8 +205,8 @@ public class ChooseAreaFragment extends Fragment {
     }
 
     //显示进度对话框
-    private void showProgressDialog(){
-        if(progressDialog == null){
+    private void showProgressDialog() {
+        if (progressDialog == null) {
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setMessage("正在加载...");
             progressDialog.setCanceledOnTouchOutside(false);
@@ -214,8 +215,8 @@ public class ChooseAreaFragment extends Fragment {
     }
 
     //关闭进度对话1框
-    private void closeProgressDialog(){
-        if(progressDialog != null){
+    private void closeProgressDialog() {
+        if (progressDialog != null) {
             progressDialog.dismiss();
         }
     }
